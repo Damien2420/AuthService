@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-daniel2420}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-damien2420}
+      POSTGRES_DB: ${POSTGRES_DB:-login_app}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_cache
+    restart: always
+    ports:
+      - "6379:6379"
+  
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis_insight
+    restart: always
+    ports:
+      - "5540:5540" # 瀏覽器開啟 http://localhost:5540
+
+volumes:
+  postgres_data:
