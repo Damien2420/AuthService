@@ -1,0 +1,64 @@
+name: Auth CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'auth-service/**'
+      - '.github/workflows/auth-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'auth-service/**'
+      - '.github/workflows/auth-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: login_app
+          POSTGRES_USER: auth
+          POSTGRES_PASSWORD: auth_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run tests
+        working-directory: auth-service
+        env:
+          DB_USERNAME: auth
+          DB_PASSWORD: auth_pass
+          GOOGLE_CLIENT_ID: dummy
+          GOOGLE_CLIENT_SECRET: dummy
+          DISCORD_CLIENT_ID: dummy
+          DISCORD_CLIENT_SECRET: dummy
+          LINE_CLIENT_ID: dummy
+          LINE_CLIENT_SECRET: dummy
+          TURNSTILE_SECRET_KEY: dummy
+          MAIL_USERNAME: ci@example.com
+          MAIL_PASSWORD: dummy
+          MAIL_FROM: ci@example.com
+        run: mvn test
